@@ -1,12 +1,12 @@
 name: Slack
 
 on:
-  schedule:
+  # schedule:
     # * is a special character in YAML so you have to quote this string
     # Daily at 00:00
     # - cron:  '0 0 * * *'
     # Every 5 minutes
-    - cron:  '*/5 * * * *'
+    # - cron:  '*/5 * * * *'
   push:
 
 env:
