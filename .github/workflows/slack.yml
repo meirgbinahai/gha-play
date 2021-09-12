@@ -1,0 +1,42 @@
+name: Slack
+
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    # Daily at 00:00
+    # - cron:  '0 0 * * *'
+    # Every 5 minutes
+    - cron:  '*/5 * * * *'
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v3.x
+      - name: Prepare
+        id: prep
+        run: |
+          echo "Prepare step ..."
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    needs:
+      - prepare
+    steps:
+      - uses: actions/checkout@v2
+  test:
+    name: Component Regression Test
+    continue-on-error: true
+    runs-on: ubuntu-20.04
+    needs:
+      - prepare
+      - build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Slack Notify
+        if: ${{ !success() }}
+        uses: rtCamp/action-slack-notify@v2.2.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_NIGHTLY }}
