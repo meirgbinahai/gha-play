@@ -8,6 +8,10 @@ on:
     # Every 5 minutes
     - cron:  '*/5 * * * *'
   push:
+
+env:
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NIGHTLY }}
+
 jobs:
   prepare:
     name: Prepare
@@ -36,8 +40,16 @@ jobs:
       - build
     steps:
       - uses: actions/checkout@v2
-      - name: Slack Notify
-        if: ${{ !success() }}
-        uses: rtCamp/action-slack-notify@v2.2.0
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_NIGHTLY }}
+      - name: Install Dependencies
+        id: install-deps
+        run: |
+          echo "Installing dependencies ..."
+      - name: Tests
+        id: tests
+        run: |
+          echo "Running tests ..."
+      - uses: act10ns/slack@v1
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+        if: always()
